@@ -67,6 +67,64 @@ app.get('/saleOrders', function(request, response){
     });
 });
 
+app.post('/companies', function(request, response){
+    var company = new Companies({
+        name: request.body.company.name,
+        symbolURL: request.body.company.symbolURL,
+        openPrice: request.body.company.openPrice,
+        currentPrice: request.body.company.currentPrice,
+        changeVolume: request.body.company.changeVolume,
+        changeIcon: request.body.company.changeIcon,
+        changePercentage: request.body.company.changePercentage,
+        changeDirection: request.body.company.changeDirection,
+        shareVolume: request.body.company.shareVolume
+    });
+    company.save(function(error){
+       if(error) response.send(error);
+       response.status(201).json({company: company});
+    });
+});
+
+app.post('/buyOrders', function(request, response){
+    var buyOrder = new BuyOrders({
+        timeStamp: request.body.buyOrder.timeStamp,
+        size: request.body.buyOrder.size,
+        price: request.body.buyOrder.price
+    });
+    buyOrder.save(function(error){
+        if(error) response.send(error);
+        response.status(201).json({buyOrder: buyOrder});
+    });
+});
+
+app.post('/saleOrders', function(request, response){
+    var saleOrder = new SaleOrders({
+        timeStamp: request.body.saleOrder.timeStamp,
+        size: request.body.saleOrder.size,
+        price: request.body.saleOrder.price
+    });
+    saleOrder.save(function(error){
+        if(error) response.send(error);
+        response.status(201).json({saleOrder: saleOrder});
+    });
+});
+
+app.post('/transactions', function(request, response){
+    
+});
+
+app.put('/companies/:company_id', function(request, response){
+
+});
+
+app.delete('/buyOrders/:buyOrder_id', function(request, response){
+
+});
+
+app.delete('/saleOrders/:saleOrder_id', function(request, response){
+
+});
+
 app.use(express.static('public'));
 
 app.listen(3000, function(){
