@@ -2,8 +2,10 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var app = express();
+var logger = require('./logger');
 
-mongoose.connect('mongodb://localhost/StockMarket');
+app.use(logger);
+app.use(bodyParser.json());
 
 var companySchema = mongoose.Schema({
     name: String,
@@ -15,33 +17,51 @@ var companySchema = mongoose.Schema({
     changePercentage: Number,
     changeDirection: Number,
     shareVolume: Number
-    //buyOrders: ,
-    //sellOrders:,
-    //transactions:
 });
 
 var buyOrderSchema = mongoose.Schema({
     timeStamp: Date,
     size: Number,
-    price: Number
-    //company
+    price: Number,
+    company: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'company'
+    }
 });
 
 var saleOrderSchema = mongoose.Schema({
     timeStamp: Date,
     size: Number,
-    price: Number
-    //COMPANY
+    price: Number,
+    company: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'company'
+    }
+});
+
+var transactionSchema = mongoose.Schema({
+    timeStamp: Date,
+    size: Number,
+    price: Number,
+    company: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'company'
+    }
 });
 
 var Companies = mongoose.model('Companies', companySchema);
 var BuyOrders = mongoose.model('BuyOrders', buyOrderSchema);
 var SaleOrders = mongoose.model('SaleOrders', saleOrderSchema);
+var Transactions = mongoose.model('Transactions', transactionSchema);
 
-var logger = require('./logger');
+//mongoose.connect('mongodb://localhost/market');
+mongoose.connect('mongodb://admin:st0ckmark3t@ds059471.mongolab.com:59471/stockmarket');
 
-app.use(logger);
-app.use(bodyParser.json());
+var dbb = mongoose.connection;
+dbb.on('error', console.error.bind(console, 'connection error:'));
+dbb.once('open', function callback () {
+    console.log("connected");
+});
 
 app.get('/companies', function(request, response){
     Companies.find(function(error, companies){
@@ -79,6 +99,7 @@ app.post('/companies', function(request, response){
         changeDirection: request.body.company.changeDirection,
         shareVolume: request.body.company.shareVolume
     });
+    //console.log(request.body);
     company.save(function(error){
        if(error) response.send(error);
        response.status(201).json({company: company});
@@ -110,19 +131,53 @@ app.post('/saleOrders', function(request, response){
 });
 
 app.post('/transactions', function(request, response){
-    
+    var transaction = new Transactions({
+        timeStamp: request.body.transaction.timeStamp,
+        size: request.body.transaction.size,
+        price: request.body.transaction.price
+    });
+    transaction.save(function(error){
+        if(error) response.send(error);
+        response.status(201).json({transaction: transaction});
+    });
 });
 
 app.put('/companies/:company_id', function(request, response){
+    Companies.findById(request.params.company_id, function(error, company){
+        if(error) response.send(error);
+        company.name = request.body.company.name,
+        company.symbolURL = request.body.company.symbolURL,
+        company.openPrice = request.body.company.openPrice,
+        company.currentPrice = request.body.company.currentPrice,
+        company.changeVolume = request.body.company.changeVolume,
+        company.changeIcon = request.body.company.changeIcon,
+        company.changePercentage = request.body.company.changePercentage,
+        company.changeDirection = request.body.company.changeDirection,
+        company.shareVolume = request.body.company.shareVolume
 
+        company.save(function(error){
+            if(error) response.send(error);
+            response.status(201).json({companies: company});
+        })
+    });
 });
 
 app.delete('/buyOrders/:buyOrder_id', function(request, response){
-
+    BuyOrders.remove({
+       _id: request.params.buyOrder_id
+    }, function(error, buyOrder){
+        if(error) response.send(error);
+        response.status(201).json({buyOrders: buyOrder});
+    });
 });
 
 app.delete('/saleOrders/:saleOrder_id', function(request, response){
-
+    SaleOrders.remove({
+        _id: request.params.saleOrder_id
+    }, function(error, saleOrder){
+        if(error) response.send(error);
+        response.status(201).json({saleOrders: saleOrder});
+    });
 });
 
 app.use(express.static('public'));
