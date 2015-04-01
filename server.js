@@ -3,9 +3,12 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var app = express();
 var logger = require('./logger');
+var locks = require('locks');
 
-app.use(logger);
+//app.use(logger);
 app.use(bodyParser.json());
+
+var mutex = locks.createMutex();
 
 var companySchema = mongoose.Schema({
     name: String,
@@ -76,9 +79,12 @@ app.post('/companies', function(request, response){
         changeDirection: request.body.company.changeDirection,
         shareVolume: request.body.company.shareVolume
     });
-    company.save(function(error){
-       if(error) response.send(error);
-       response.status(201).json({company: company});
+    mutex.lock(function() {
+        company.save(function(error){
+            mutex.unlock();
+            if(error) response.send(error);
+            response.status(201).json({company: company});
+        });
     });
 });
 
@@ -102,9 +108,12 @@ app.post('/saleOrders', function(request, response){
         price: request.body.saleOrder.price,
         company: request.body.saleOrder.company
     });
-    saleOrder.save(function(error){
-        if(error) response.send(error);
-        response.status(201).json({saleOrder: saleOrder});
+    mutex.lock(function() {
+        saleOrder.save(function(error){
+            mutex.unlock();
+            if(error) response.send(error);
+            response.status(201).json({saleOrder: saleOrder});
+        });
     });
 });
 
@@ -115,9 +124,12 @@ app.post('/transactions', function(request, response){
         price: request.body.transaction.price,
         company: request.body.transaction.company
     });
-    transaction.save(function(error){
-        if(error) response.send(error);
-        response.status(201).json({transaction: transaction});
+    mutex.lock(function() {
+        transaction.save(function(error){
+            mutex.unlock();
+            if(error) response.send(error);
+            response.status(201).json({transaction: transaction});
+        });
     });
 });
 
@@ -134,10 +146,13 @@ app.put('/companies/:company_id', function(request, response){
         company.changeDirection = request.body.company.changeDirection,
         company.shareVolume = request.body.company.shareVolume
 
-        company.save(function(error){
-            if(error) response.send(error);
-            response.status(201).json({companies: company});
-        })
+        mutex.lock(function() {
+            company.save(function(error){
+                mutex.unlock();
+                if(error) response.send(error);
+                response.status(201).json({companies: company});
+            });
+        });
     });
 });
 
@@ -172,20 +187,26 @@ app.put('/saleOrders/:saleOrder_id', function(request, response){
 });
 
 app.delete('/buyOrders/:buyOrder_id', function(request, response){
-    BuyOrders.remove({
-       _id: request.params.buyOrder_id
-    }, function(error, buyOrder){
-        if(error) response.send(error);
-        response.status(201).json({buyOrders: buyOrder});
+    mutex.lock(function() {
+        BuyOrders.remove({
+           _id: request.params.buyOrder_id
+        }, function(error, buyOrder){
+            mutex.unlock();
+            if(error) response.send(error);
+            response.status(201).json({buyOrders: buyOrder});
+        });
     });
 });
 
 app.delete('/saleOrders/:saleOrder_id', function(request, response){
-    SaleOrders.remove({
-        _id: request.params.saleOrder_id
-    }, function(error, saleOrder){
-        if(error) response.send(error);
-        response.status(201).json({saleOrders: saleOrder});
+    mutex.lock(function() {
+        SaleOrders.remove({
+            _id: request.params.saleOrder_id
+        }, function(error, saleOrder){
+            mutex.unlock();
+            if(error) response.send(error);
+            response.status(201).json({saleOrders: saleOrder});
+        });
     });
 });
 
