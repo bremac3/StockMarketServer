@@ -24,10 +24,6 @@ var orderSchema = mongoose.Schema({
     size: Number,
     price: Number,
     company: String
-    //company: {
-    //    type: mongoose.Schema.ObjectId,
-    //    ref: 'company'
-    //}
 });
 
 var Companies = mongoose.model('Companies', companySchema);
@@ -35,8 +31,8 @@ var BuyOrders = mongoose.model('BuyOrders', orderSchema);
 var SaleOrders = mongoose.model('SaleOrders', orderSchema);
 var Transactions = mongoose.model('Transactions', orderSchema);
 
-mongoose.connect('mongodb://localhost/market');
-//mongoose.connect('mongodb://admin:st0ckmark3t@ds059471.mongolab.com:59471/stockmarket');
+//mongoose.connect('mongodb://localhost/market');
+mongoose.connect('mongodb://admin:st0ckmark3t@ds059471.mongolab.com:59471/stockmarket');
 
 var dbb = mongoose.connection;
 dbb.on('error', console.error.bind(console, 'connection error:'));
@@ -141,6 +137,36 @@ app.put('/companies/:company_id', function(request, response){
         company.save(function(error){
             if(error) response.send(error);
             response.status(201).json({companies: company});
+        })
+    });
+});
+
+app.put('/buyOrders/:buyOrder_id', function(request, response){
+    BuyOrders.findById(request.params.buyOrder_id, function(error, buyOrder){
+        if(error) response.send(error);
+        buyOrder.timeStamp = request.body.buyOrder.timeStamp,
+        buyOrder.size = request.body.buyOrder.size,
+        buyOrder.price = request.body.buyOrder.price,
+        buyOrder.company = request.body.buyOrder.company
+
+        buyOrder.save(function(error){
+            if(error) response.send(error);
+            response.status(201).json({buyOrders: buyOrder});
+        })
+    });
+});
+
+app.put('/saleOrders/:saleOrder_id', function(request, response){
+    SaleOrders.findById(request.params.saleOrder_id, function(error, saleOrder){
+        if(error) response.send(error);
+        saleOrder.timeStamp = request.body.saleOrder.timeStamp,
+        saleOrder.size = request.body.saleOrder.size,
+        saleOrder.price = request.body.saleOrder.price,
+        saleOrder.company = request.body.saleOrder.company
+
+        saleOrder.save(function(error){
+            if(error) response.send(error);
+            response.status(201).json({saleOrders: saleOrder});
         })
     });
 });
