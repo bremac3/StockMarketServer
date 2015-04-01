@@ -19,43 +19,24 @@ var companySchema = mongoose.Schema({
     shareVolume: Number
 });
 
-var buyOrderSchema = mongoose.Schema({
+var orderSchema = mongoose.Schema({
     timeStamp: Date,
     size: Number,
     price: Number,
-    company: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'company'
-    }
-});
-
-var saleOrderSchema = mongoose.Schema({
-    timeStamp: Date,
-    size: Number,
-    price: Number,
-    company: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'company'
-    }
-});
-
-var transactionSchema = mongoose.Schema({
-    timeStamp: Date,
-    size: Number,
-    price: Number,
-    company: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'company'
-    }
+    company: String
+    //company: {
+    //    type: mongoose.Schema.ObjectId,
+    //    ref: 'company'
+    //}
 });
 
 var Companies = mongoose.model('Companies', companySchema);
-var BuyOrders = mongoose.model('BuyOrders', buyOrderSchema);
-var SaleOrders = mongoose.model('SaleOrders', saleOrderSchema);
-var Transactions = mongoose.model('Transactions', transactionSchema);
+var BuyOrders = mongoose.model('BuyOrders', orderSchema);
+var SaleOrders = mongoose.model('SaleOrders', orderSchema);
+var Transactions = mongoose.model('Transactions', orderSchema);
 
-//mongoose.connect('mongodb://localhost/market');
-mongoose.connect('mongodb://admin:st0ckmark3t@ds059471.mongolab.com:59471/stockmarket');
+mongoose.connect('mongodb://localhost/market');
+//mongoose.connect('mongodb://admin:st0ckmark3t@ds059471.mongolab.com:59471/stockmarket');
 
 var dbb = mongoose.connection;
 dbb.on('error', console.error.bind(console, 'connection error:'));
@@ -66,7 +47,7 @@ dbb.once('open', function callback () {
 app.get('/companies', function(request, response){
     Companies.find(function(error, companies){
         if(error) response.send(error);
-        response.json({company: companies});
+        response.status(201).json({company: companies});
         console.log(companies);
     });
 });
@@ -74,7 +55,7 @@ app.get('/companies', function(request, response){
 app.get('/buyOrders', function(request, response){
     BuyOrders.find(function(error, buyOrders){
         if(error) response.send(error);
-        response.json({buyOrders: buyOrders});
+        response.status(201).json({buyOrders: buyOrders});
         console.log(buyOrders);
     });
 });
@@ -82,7 +63,7 @@ app.get('/buyOrders', function(request, response){
 app.get('/saleOrders', function(request, response){
     SaleOrders.find(function(error, saleOrders){
         if(error) response.send(error);
-        response.json({saleOrders: saleOrders});
+        response.status(201).json({saleOrders: saleOrders});
         console.log(saleOrders);
     });
 });
@@ -109,7 +90,8 @@ app.post('/buyOrders', function(request, response){
     var buyOrder = new BuyOrders({
         timeStamp: request.body.buyOrder.timeStamp,
         size: request.body.buyOrder.size,
-        price: request.body.buyOrder.price
+        price: request.body.buyOrder.price,
+        company: request.body.buyOrder.company
     });
     buyOrder.save(function(error){
         if(error) response.send(error);
@@ -121,7 +103,8 @@ app.post('/saleOrders', function(request, response){
     var saleOrder = new SaleOrders({
         timeStamp: request.body.saleOrder.timeStamp,
         size: request.body.saleOrder.size,
-        price: request.body.saleOrder.price
+        price: request.body.saleOrder.price,
+        company: request.body.saleOrder.company
     });
     saleOrder.save(function(error){
         if(error) response.send(error);
@@ -133,7 +116,8 @@ app.post('/transactions', function(request, response){
     var transaction = new Transactions({
         timeStamp: request.body.transaction.timeStamp,
         size: request.body.transaction.size,
-        price: request.body.transaction.price
+        price: request.body.transaction.price,
+        company: request.body.transaction.company
     });
     transaction.save(function(error){
         if(error) response.send(error);

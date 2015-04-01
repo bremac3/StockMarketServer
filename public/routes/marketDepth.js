@@ -7,7 +7,8 @@ StockExchangeMarket.MarketDepthRoute = Ember.Route.extend({
         this.render('marketByOrder', {outlet: 'marketByOrder', into: 'marketDepth', controller: 'marketByOrder'});
         this.render('marketByPrice', {outlet: 'marketByPrice', into: 'marketDepth', controller: 'marketByPrice'});
         this.render('symbol',        {outlet: 'symbol', into: 'marketDepth', controller: 'symbol'});
-    },
+    }
+    ,
     model: function (params) {
         this.store.find('buyOrder', { 'company': params.company_id });
         this.store.find('saleOrder', { 'company': params.company_id });
