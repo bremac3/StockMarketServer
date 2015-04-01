@@ -164,10 +164,13 @@ app.put('/buyOrders/:buyOrder_id', function(request, response){
         buyOrder.price = request.body.buyOrder.price,
         buyOrder.company = request.body.buyOrder.company
 
-        buyOrder.save(function(error){
-            if(error) response.send(error);
-            response.status(201).json({buyOrders: buyOrder});
-        })
+        mutex.lock(function() {
+            buyOrder.save(function(error){
+                mutex.unlock();
+                if(error) response.send(error);
+                response.status(201).json({buyOrders: buyOrder});
+            });
+        });
     });
 });
 
@@ -179,10 +182,13 @@ app.put('/saleOrders/:saleOrder_id', function(request, response){
         saleOrder.price = request.body.saleOrder.price,
         saleOrder.company = request.body.saleOrder.company
 
-        saleOrder.save(function(error){
-            if(error) response.send(error);
-            response.status(201).json({saleOrders: saleOrder});
-        })
+        mutex.lock(function() {
+            saleOrder.save(function(error){
+                mutex.unlock();
+                if(error) response.send(error);
+                response.status(201).json({saleOrders: saleOrder});
+            });
+        });
     });
 });
 
