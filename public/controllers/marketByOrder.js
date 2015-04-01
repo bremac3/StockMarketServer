@@ -11,7 +11,7 @@ StockExchangeMarket.MarketByOrderController = Ember.ObjectController.extend({
 
     marketByOrderGrid: function () {
         var company = this.get('controllers.marketDepth.model');
-
+        console.log(company.get('buyOrders').content.length);
         var buyOrders = company.get('buyOrders').sortBy('price');
         var saleOrders = company.get('saleOrders').sortBy('price');
         var table = [];

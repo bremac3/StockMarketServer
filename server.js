@@ -74,7 +74,7 @@ app.get('/companies', function(request, response){
 app.get('/buyOrders', function(request, response){
     BuyOrders.find(function(error, buyOrders){
         if(error) response.send(error);
-        response.json({buyOrder: buyOrders});
+        response.json({buyOrders: buyOrders});
         console.log(buyOrders);
     });
 });
@@ -82,7 +82,7 @@ app.get('/buyOrders', function(request, response){
 app.get('/saleOrders', function(request, response){
     SaleOrders.find(function(error, saleOrders){
         if(error) response.send(error);
-        response.json({saleOrder: saleOrders});
+        response.json({saleOrders: saleOrders});
         console.log(saleOrders);
     });
 });
@@ -99,7 +99,6 @@ app.post('/companies', function(request, response){
         changeDirection: request.body.company.changeDirection,
         shareVolume: request.body.company.shareVolume
     });
-    //console.log(request.body);
     company.save(function(error){
        if(error) response.send(error);
        response.status(201).json({company: company});
